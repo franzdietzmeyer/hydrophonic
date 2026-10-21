@@ -1,0 +1,7 @@
+streamlit
+stmol
+py3Dmol
+biopython
+pretty_midi
+scipy
+numpy

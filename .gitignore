@@ -1,0 +1,22 @@
+# Python / legacy Streamlit app
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# big local soundfonts (not needed by the web app; GitHub rejects files > 100 MB)
+*.sf2
+*.sf3
+soundfont.zip
+GeneralUser_GS.*
+
+# generated audio / structure files
+*.mid
+*.wav
+*.cif
+*.pdb
+
+# OS / tools
+.DS_Store
+Claude outputs/
+node_modules/
