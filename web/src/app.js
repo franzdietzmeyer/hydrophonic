@@ -219,15 +219,17 @@ async function ensureSamples(){
   setStatus('Loading samples...');
   return loadStyleSamples(st, (d, n) => setStatus(`Loading samples ${d}/${n}...`));
 }
+const audioInfo = () => ` | audio ${Tone.context.state} ${Math.round(Tone.context.sampleRate / 100) / 10} kHz`;
 function sampleReport(R){
   const st = STYLES[state.styleKey];
-  if (!st.samples) return setStatus(`Playing: ${st.name} (synthesized)`);
+  if (!st.samples) return setStatus(`Playing: ${st.name} (synthesized)` + audioInfo());
   const fb = [...new Set(R.fallback)];
-  setStatus(`Playing: ${st.name}` + (fb.length ? ` | synth fallback for: ${fb.join(', ')}` : ' | samples loaded'), fb.length > 0);
+  setStatus(`Playing: ${st.name}` + (fb.length ? ` | synth fallback for: ${fb.join(', ')}` : ' | samples loaded') + audioInfo(), fb.length > 0);
 }
 async function play(){
   if (!state.chain) return;
   try { await Tone.start(); } catch (e) { console.error(e); }
+  if (Tone.context.state !== 'running') { try { await Tone.context.rawContext.resume(); } catch (e) {} }
   if (Tone.context.state !== 'running') {
     setStatus('Audio is blocked by the browser: click anywhere on the page, then press PLAY again', true); return; }
   stop();
@@ -355,8 +357,10 @@ document.addEventListener('keydown', e => { if (['TEXTAREA', 'INPUT', 'SELECT'].
 
 renderStylePads(); renderStyleDesc(); renderSteps(0, -1);
 // unlock audio on the first interaction anywhere (some browsers only allow it inside a direct gesture)
+// Safari counts click / touchend / keydown / mousedown as activation, not pointerdown; 'interrupted' is Safari's own state
 const unlock = () => { if (Tone.context.state !== 'running') Tone.start().catch(() => {}); };
-['pointerdown', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, unlock, {capture: true, passive: true}));
+['pointerdown', 'mousedown', 'click', 'keydown', 'touchstart', 'touchend'].forEach(ev => document.addEventListener(ev, unlock, {capture: true, passive: true}));
+document.addEventListener('visibilitychange', () => { if (!document.hidden && state.playing) unlock(); });
 window.addEventListener('error', e => setStatus('Error: ' + e.message, true));
 window.addEventListener('unhandledrejection', e => setStatus('Error: ' + (e.reason && e.reason.message || e.reason), true));
 window.__mf = {state, renderOffline, useProtein, loadQuery, setMode, setStyle, STYLES, makeSong, knobs, get viz(){ return viz; }};

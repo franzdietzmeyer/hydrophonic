@@ -40,6 +40,7 @@ button,select,textarea,input{font:inherit;color:inherit}
   background:linear-gradient(180deg,#fff 0%,#d7d2c2 55%,#a29d8e 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
 .brand i{font-style:italic;color:var(--orange);-webkit-text-fill-color:var(--orange)}
 .model{font-size:11px;letter-spacing:.3em;color:var(--dim);margin-top:5px}
+.byline{font-size:11px;letter-spacing:.12em;color:var(--orange);margin-top:6px;opacity:.85}
 .stripes{display:inline-block;width:46px;height:9px;margin-left:10px;vertical-align:middle;
   background:repeating-linear-gradient(90deg,var(--orange) 0 6px,transparent 6px 10px)}
 .power{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.14em;color:var(--dim)}
@@ -129,6 +130,7 @@ select.lcdsel{background:var(--lcdbg);color:var(--lcd);border:2px solid #050505;
 .monfoot select{background:#151617;border:1px solid #000;border-radius:4px;color:var(--silk);font:11px var(--mono);padding:4px}
 .hud{position:absolute;font-family:var(--lcdf);font-size:clamp(14px,2vw,26px);letter-spacing:.06em;color:#ffcf6b;
   text-shadow:0 0 6px rgba(255,176,0,.75);pointer-events:none;text-transform:uppercase;line-height:1.05;z-index:2}
+.hud.sig{bottom:12px;left:50%;transform:translateX(-50%);font-size:clamp(10px,1.1vw,14px);color:rgba(236,231,214,.28);text-shadow:none;letter-spacing:.3em;white-space:nowrap}
 .hud.tl{top:14px;left:18px}.hud.tr{top:14px;right:18px;text-align:right}.hud.bl{bottom:14px;left:18px}.hud.br{bottom:14px;right:18px;text-align:right}
 .hud small{display:block;font-size:.62em;color:#9fe8b8;text-shadow:0 0 5px rgba(67,224,138,.7)}
 .hud .led{width:.5em;height:.5em;margin-left:.4em;vertical-align:middle}
@@ -187,14 +189,14 @@ select.lcdsel{background:var(--lcdbg);color:var(--lcd);border:2px solid #050505;
   .stage{border-radius:10px}
   .steps{grid-template-columns:repeat(8,1fr)}
   .knob,.var{width:66px}.kcap{width:50px;height:50px}
-  .hud{font-size:13px}.hud.tr{display:none}.hud small{font-size:.75em}
+  .hud{font-size:13px}.hud.tr{display:none}.hud.sig{display:none}.hud small{font-size:.75em}
 }
 </style>
 </head>
 <body>
 <div class="rack">
   <header class="unit top">
-    <div class="logo"><span class="brand">HYDRO<i>PHONIC</i><span class="stripes"></span></span><span class="model">HX-20 PROTEIN SYNTHESIZER</span></div>
+    <div class="logo"><span class="brand">HYDRO<i>PHONIC</i><span class="stripes"></span></span><span class="model">HX-20 PROTEIN SYNTHESIZER</span><span class="byline">by Franz Dietzmeyer</span></div>
     <div class="lcd" id="status">INSERT PROTEIN &gt; 01 LOAD</div>
     <div class="power"><span class="led g on"></span>POWER</div>
   </header>
@@ -246,6 +248,7 @@ select.lcdsel{background:var(--lcdbg);color:var(--lcd);border:2px solid #050505;
           <div class="hud tr"><span id="hudStyle">-</span><span class="led" id="led"></span><small id="hudBpm">-</small></div>
           <div class="hud bl"><span id="hudRes">---</span><small id="hudSS">&nbsp;</small></div>
           <div class="hud br"><span id="hudChord">&nbsp;</span><small id="hudSec">&nbsp;</small></div>
+          <div class="hud sig">Hydrophonic &middot; Franz Dietzmeyer</div>
         </div>
         <div class="monfoot">
           <span class="badge">MF-VISION 14</span>
@@ -709,8 +712,8 @@ const SAL_BASE = 'https://tonejs.github.io/audio/salamander/';
 const SAMPLE_CACHE = new Map();
 async function fetchText(url){ const r = await fetch(url); if (!r.ok) throw new Error(`HTTP ${r.status} for ${url}`); return r.text(); }
 async function fetchBuf(url){ const r = await fetch(url); if (!r.ok) throw new Error(`HTTP ${r.status} for ${url}`); return r.arrayBuffer(); }
-let _dctx = null;
-const decodeAudio = ab => (_dctx || (_dctx = new OfflineAudioContext(2, 44100, 44100))).decodeAudioData(ab);
+// decode with the one live AudioContext (Safari limits the number of contexts per page; buffers are shared with offline export)
+const decodeAudio = ab => Tone.getContext().decodeAudioData(ab);
 function noteToMidi(nm){ const m = nm.match(/^([A-G])(b|#|s)?(-?\d)$/); if (!m) return null;
   const acc = m[2] === 'b' ? -1 : m[2] ? 1 : 0;
   return 12 * (+m[3] + 1) + {C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11}[m[1]] + acc; }
@@ -762,14 +765,29 @@ function instrument(R, spec, ...dests){
 
 // ---------- shared audio helpers ----------
 function track(R, ...nodes){ R.nodes.push(...nodes); return nodes[0]; }
+// Reverb impulse responses are computed directly in JS (decaying stereo noise) and cached.
+// Tone.Reverb renders them through a new OfflineAudioContext on every play, which some browsers handle badly.
+const IR_CACHE = new Map();
+function impulse(decay, preDelay = 0.02){
+  const ctx = Tone.getContext().rawContext, sr = ctx.sampleRate, key = decay + '|' + sr;
+  if (IR_CACHE.has(key)) return IR_CACHE.get(key);
+  const len = Math.max(1, Math.floor(sr * (decay + preDelay))), pre = Math.floor(sr * preDelay);
+  const buf = ctx.createBuffer(2, len, sr);
+  for (let c = 0; c < 2; c++) {
+    const d = buf.getChannelData(c);
+    for (let i = pre; i < len; i++) { const t = (i - pre) / sr; d[i] = (Math.random() * 2 - 1) * Math.pow(10, -3 * t / decay); }
+  }
+  IR_CACHE.set(key, buf);
+  return buf;
+}
 function makeFx(out, o = {}){
-  const rev = new Tone.Reverb({decay: o.decay || 3, preDelay: 0.02, wet: 1}).connect(out);
+  const rev = new Tone.Convolver(impulse(o.decay || 3)).connect(out);
   const revIn = new Tone.Gain(o.rev ?? 0.25).connect(rev);
   const delF = new Tone.Filter(o.delayTone || 2800, 'lowpass').connect(out);
   delF.connect(revIn);
   const del = new Tone.FeedbackDelay({delayTime: o.delayTime || '8n.', feedback: o.fb ?? 0.35, wet: 1}).connect(delF);
   const delIn = new Tone.Gain(o.del ?? 0.25).connect(del);
-  return {rev, revIn, del, delIn, delF, ready: rev.ready, nodes: [rev, revIn, delF, del, delIn]};
+  return {rev, revIn, del, delIn, delF, ready: Promise.resolve(), nodes: [rev, revIn, delF, del, delIn]};
 }
 function bell(R, out, fx){
   const b = track(R, new Tone.FMSynth({harmonicity: 3.01, modulationIndex: 10,
@@ -818,8 +836,8 @@ function drumKit(R, out, flavor, fx){
   const snBus = track(R, new Tone.Gain(1)).connect(bus);
   if (flavor === 'wave') {
     const gate = track(R, new Tone.Gain(0)).connect(bus);
-    const rv = track(R, new Tone.Reverb({decay: 1.6, wet: 1})).connect(gate);
-    snBus.connect(rv); K._gate = gate; R.extraReady.push(rv.ready);
+    const rv = track(R, new Tone.Convolver(impulse(1.6))).connect(gate);
+    snBus.connect(rv); K._gate = gate;
   } else if (fx) snBus.connect(fx.revIn);
   const body = track(R, new Tone.MembraneSynth({pitchDecay: 0.01, octaves: 1.5, envelope: {attack: 0.001, decay: 0.1, sustain: 0}})).connect(snBus);
   body.volume.value = P.sn - 4;
@@ -2410,15 +2428,17 @@ async function ensureSamples(){
   setStatus('Loading samples...');
   return loadStyleSamples(st, (d, n) => setStatus(`Loading samples ${d}/${n}...`));
 }
+const audioInfo = () => ` | audio ${Tone.context.state} ${Math.round(Tone.context.sampleRate / 100) / 10} kHz`;
 function sampleReport(R){
   const st = STYLES[state.styleKey];
-  if (!st.samples) return setStatus(`Playing: ${st.name} (synthesized)`);
+  if (!st.samples) return setStatus(`Playing: ${st.name} (synthesized)` + audioInfo());
   const fb = [...new Set(R.fallback)];
-  setStatus(`Playing: ${st.name}` + (fb.length ? ` | synth fallback for: ${fb.join(', ')}` : ' | samples loaded'), fb.length > 0);
+  setStatus(`Playing: ${st.name}` + (fb.length ? ` | synth fallback for: ${fb.join(', ')}` : ' | samples loaded') + audioInfo(), fb.length > 0);
 }
 async function play(){
   if (!state.chain) return;
   try { await Tone.start(); } catch (e) { console.error(e); }
+  if (Tone.context.state !== 'running') { try { await Tone.context.rawContext.resume(); } catch (e) {} }
   if (Tone.context.state !== 'running') {
     setStatus('Audio is blocked by the browser: click anywhere on the page, then press PLAY again', true); return; }
   stop();
@@ -2546,8 +2566,10 @@ document.addEventListener('keydown', e => { if (['TEXTAREA', 'INPUT', 'SELECT'].
 
 renderStylePads(); renderStyleDesc(); renderSteps(0, -1);
 // unlock audio on the first interaction anywhere (some browsers only allow it inside a direct gesture)
+// Safari counts click / touchend / keydown / mousedown as activation, not pointerdown; 'interrupted' is Safari's own state
 const unlock = () => { if (Tone.context.state !== 'running') Tone.start().catch(() => {}); };
-['pointerdown', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, unlock, {capture: true, passive: true}));
+['pointerdown', 'mousedown', 'click', 'keydown', 'touchstart', 'touchend'].forEach(ev => document.addEventListener(ev, unlock, {capture: true, passive: true}));
+document.addEventListener('visibilitychange', () => { if (!document.hidden && state.playing) unlock(); });
 window.addEventListener('error', e => setStatus('Error: ' + e.message, true));
 window.addEventListener('unhandledrejection', e => setStatus('Error: ' + (e.reason && e.reason.message || e.reason), true));
 window.__mf = {state, renderOffline, useProtein, loadQuery, setMode, setStyle, STYLES, makeSong, knobs, get viz(){ return viz; }};

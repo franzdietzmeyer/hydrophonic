@@ -224,8 +224,8 @@ const SAL_BASE = 'https://tonejs.github.io/audio/salamander/';
 const SAMPLE_CACHE = new Map();
 async function fetchText(url){ const r = await fetch(url); if (!r.ok) throw new Error(`HTTP ${r.status} for ${url}`); return r.text(); }
 async function fetchBuf(url){ const r = await fetch(url); if (!r.ok) throw new Error(`HTTP ${r.status} for ${url}`); return r.arrayBuffer(); }
-let _dctx = null;
-const decodeAudio = ab => (_dctx || (_dctx = new OfflineAudioContext(2, 44100, 44100))).decodeAudioData(ab);
+// decode with the one live AudioContext (Safari limits the number of contexts per page; buffers are shared with offline export)
+const decodeAudio = ab => Tone.getContext().decodeAudioData(ab);
 function noteToMidi(nm){ const m = nm.match(/^([A-G])(b|#|s)?(-?\d)$/); if (!m) return null;
   const acc = m[2] === 'b' ? -1 : m[2] ? 1 : 0;
   return 12 * (+m[3] + 1) + {C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11}[m[1]] + acc; }
@@ -277,14 +277,29 @@ function instrument(R, spec, ...dests){
 
 // ---------- shared audio helpers ----------
 function track(R, ...nodes){ R.nodes.push(...nodes); return nodes[0]; }
+// Reverb impulse responses are computed directly in JS (decaying stereo noise) and cached.
+// Tone.Reverb renders them through a new OfflineAudioContext on every play, which some browsers handle badly.
+const IR_CACHE = new Map();
+function impulse(decay, preDelay = 0.02){
+  const ctx = Tone.getContext().rawContext, sr = ctx.sampleRate, key = decay + '|' + sr;
+  if (IR_CACHE.has(key)) return IR_CACHE.get(key);
+  const len = Math.max(1, Math.floor(sr * (decay + preDelay))), pre = Math.floor(sr * preDelay);
+  const buf = ctx.createBuffer(2, len, sr);
+  for (let c = 0; c < 2; c++) {
+    const d = buf.getChannelData(c);
+    for (let i = pre; i < len; i++) { const t = (i - pre) / sr; d[i] = (Math.random() * 2 - 1) * Math.pow(10, -3 * t / decay); }
+  }
+  IR_CACHE.set(key, buf);
+  return buf;
+}
 function makeFx(out, o = {}){
-  const rev = new Tone.Reverb({decay: o.decay || 3, preDelay: 0.02, wet: 1}).connect(out);
+  const rev = new Tone.Convolver(impulse(o.decay || 3)).connect(out);
   const revIn = new Tone.Gain(o.rev ?? 0.25).connect(rev);
   const delF = new Tone.Filter(o.delayTone || 2800, 'lowpass').connect(out);
   delF.connect(revIn);
   const del = new Tone.FeedbackDelay({delayTime: o.delayTime || '8n.', feedback: o.fb ?? 0.35, wet: 1}).connect(delF);
   const delIn = new Tone.Gain(o.del ?? 0.25).connect(del);
-  return {rev, revIn, del, delIn, delF, ready: rev.ready, nodes: [rev, revIn, delF, del, delIn]};
+  return {rev, revIn, del, delIn, delF, ready: Promise.resolve(), nodes: [rev, revIn, delF, del, delIn]};
 }
 function bell(R, out, fx){
   const b = track(R, new Tone.FMSynth({harmonicity: 3.01, modulationIndex: 10,
@@ -333,8 +348,8 @@ function drumKit(R, out, flavor, fx){
   const snBus = track(R, new Tone.Gain(1)).connect(bus);
   if (flavor === 'wave') {
     const gate = track(R, new Tone.Gain(0)).connect(bus);
-    const rv = track(R, new Tone.Reverb({decay: 1.6, wet: 1})).connect(gate);
-    snBus.connect(rv); K._gate = gate; R.extraReady.push(rv.ready);
+    const rv = track(R, new Tone.Convolver(impulse(1.6))).connect(gate);
+    snBus.connect(rv); K._gate = gate;
   } else if (fx) snBus.connect(fx.revIn);
   const body = track(R, new Tone.MembraneSynth({pitchDecay: 0.01, octaves: 1.5, envelope: {attack: 0.001, decay: 0.1, sustain: 0}})).connect(snBus);
   body.volume.value = P.sn - 4;

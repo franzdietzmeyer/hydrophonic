@@ -129,13 +129,6 @@ No internet? Press **OFFLINE DEMO**: instruments fall back to synthesizers, but 
 | FASTA or plain sequence | pasted | none: a generated path is shown and clearly labeled |
 | `.cif` file | your disk | from the file; secondary structure estimated from CA geometry if the file has none |
 
-## Deploy
-
-Static files only, no server code, no build step.
-
-- **Netlify**: import the repo; `netlify.toml` already publishes `web/`. Or drag `web/` onto <https://app.netlify.com/drop>.
-- **Anything else**: serve the contents of `web/`.
-
 ## Project structure
 
 ```
@@ -160,14 +153,8 @@ After changing anything in `web/src`:
 python3 web/src/build.py
 ```
 
-## Browser support
-
-Developed and tested in **Chrome**. Other browsers currently load and render but may not play audio; fixing that is on the roadmap.
-Requires WebGL2 and Web Audio.
-
 ## Roadmap
 
-- [ ] Audio in Safari and Firefox
 - [ ] Disulfide bonds as call and response, binding sites as special events
 - [ ] MIDI export
 - [ ] Sampled drum kits

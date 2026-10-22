@@ -40,6 +40,7 @@ button,select,textarea,input{font:inherit;color:inherit}
   background:linear-gradient(180deg,#fff 0%,#d7d2c2 55%,#a29d8e 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
 .brand i{font-style:italic;color:var(--orange);-webkit-text-fill-color:var(--orange)}
 .model{font-size:11px;letter-spacing:.3em;color:var(--dim);margin-top:5px}
+.byline{font-size:11px;letter-spacing:.12em;color:var(--orange);margin-top:6px;opacity:.85}
 .stripes{display:inline-block;width:46px;height:9px;margin-left:10px;vertical-align:middle;
   background:repeating-linear-gradient(90deg,var(--orange) 0 6px,transparent 6px 10px)}
 .power{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.14em;color:var(--dim)}
@@ -129,6 +130,7 @@ select.lcdsel{background:var(--lcdbg);color:var(--lcd);border:2px solid #050505;
 .monfoot select{background:#151617;border:1px solid #000;border-radius:4px;color:var(--silk);font:11px var(--mono);padding:4px}
 .hud{position:absolute;font-family:var(--lcdf);font-size:clamp(14px,2vw,26px);letter-spacing:.06em;color:#ffcf6b;
   text-shadow:0 0 6px rgba(255,176,0,.75);pointer-events:none;text-transform:uppercase;line-height:1.05;z-index:2}
+.hud.sig{bottom:12px;left:50%;transform:translateX(-50%);font-size:clamp(10px,1.1vw,14px);color:rgba(236,231,214,.28);text-shadow:none;letter-spacing:.3em;white-space:nowrap}
 .hud.tl{top:14px;left:18px}.hud.tr{top:14px;right:18px;text-align:right}.hud.bl{bottom:14px;left:18px}.hud.br{bottom:14px;right:18px;text-align:right}
 .hud small{display:block;font-size:.62em;color:#9fe8b8;text-shadow:0 0 5px rgba(67,224,138,.7)}
 .hud .led{width:.5em;height:.5em;margin-left:.4em;vertical-align:middle}
@@ -187,14 +189,14 @@ select.lcdsel{background:var(--lcdbg);color:var(--lcd);border:2px solid #050505;
   .stage{border-radius:10px}
   .steps{grid-template-columns:repeat(8,1fr)}
   .knob,.var{width:66px}.kcap{width:50px;height:50px}
-  .hud{font-size:13px}.hud.tr{display:none}.hud small{font-size:.75em}
+  .hud{font-size:13px}.hud.tr{display:none}.hud.sig{display:none}.hud small{font-size:.75em}
 }
 </style>
 </head>
 <body>
 <div class="rack">
   <header class="unit top">
-    <div class="logo"><span class="brand">HYDRO<i>PHONIC</i><span class="stripes"></span></span><span class="model">HX-20 PROTEIN SYNTHESIZER</span></div>
+    <div class="logo"><span class="brand">HYDRO<i>PHONIC</i><span class="stripes"></span></span><span class="model">HX-20 PROTEIN SYNTHESIZER</span><span class="byline">by Franz Dietzmeyer</span></div>
     <div class="lcd" id="status">INSERT PROTEIN &gt; 01 LOAD</div>
     <div class="power"><span class="led g on"></span>POWER</div>
   </header>
@@ -246,6 +248,7 @@ select.lcdsel{background:var(--lcdbg);color:var(--lcd);border:2px solid #050505;
           <div class="hud tr"><span id="hudStyle">-</span><span class="led" id="led"></span><small id="hudBpm">-</small></div>
           <div class="hud bl"><span id="hudRes">---</span><small id="hudSS">&nbsp;</small></div>
           <div class="hud br"><span id="hudChord">&nbsp;</span><small id="hudSec">&nbsp;</small></div>
+          <div class="hud sig">Hydrophonic &middot; Franz Dietzmeyer</div>
         </div>
         <div class="monfoot">
           <span class="badge">MF-VISION 14</span>
