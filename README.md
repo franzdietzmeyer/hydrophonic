@@ -14,7 +14,7 @@
 
 Type a PDB ID, a UniProt accession or a raw sequence.
 Hydrophonic reads the fold, composes a song in one of 15 styles
-and throws the backbone into a 90s-style audio-reactive visualizer.
+and flies you through the structure while it plays, always looking at the amino acid you hear.
 
 ![Tone.js](https://img.shields.io/badge/audio-Tone.js-ff7a1a?style=flat-square)
 ![WebGL2](https://img.shields.io/badge/visuals-WebGL2-46f08f?style=flat-square)
@@ -22,7 +22,9 @@ and throws the backbone into a 90s-style audio-reactive visualizer.
 ![License](https://img.shields.io/badge/license-AGPL--3.0-ece7d6?style=flat-square)
 ![Data](https://img.shields.io/badge/data-RCSB%20PDB%20%7C%20AlphaFold%20DB-4fa8ff?style=flat-square)
 
-<img src="docs/demo.gif" width="720" alt="Visualizer: the backbone of PDB 1BD2 inside a feedback tunnel, a kaleidoscope and an oscilloscope">
+<img src="docs/fly.gif" width="760" alt="Fly-through mode: the camera travels along the backbone of PDB 1BD2 as a jazz trio plays it, the sounding residue shown as sticks with a label">
+
+<sub>FLY mode: PDB 1BD2, chain A, played as a jazz trio. The residue you hear is drawn as sticks.</sub>
 
 </div>
 
@@ -41,12 +43,12 @@ The result is music you would actually leave on, and every song is still a finge
 
 ```mermaid
 flowchart LR
-    A[PDB ID / UniProt / FASTA] --> B[Parse mmCIF<br/>sequence, helix/sheet/coil,<br/>CA trace, B-factor]
+    A[PDB ID / UniProt / FASTA] --> B[Parse mmCIF<br/>sequence, helix/sheet/coil,<br/>atoms, B-factor]
     B --> C[Features<br/>Kyte-Doolittle hydropathy,<br/>charge, smoothing]
     C --> D[Composer<br/>sections, chords,<br/>motifs, phrase forms]
     D --> E[Style engine<br/>15 styles, Tone.js,<br/>sampled instruments]
     E --> F((Speakers))
-    E --> G[Visualizer<br/>WebGL2 feedback,<br/>backbone ribbon]
+    E --> G[Visualizer<br/>lit cartoon, sticks,<br/>orbit / follow / fly, trip]
     B --> G
 ```
 
@@ -55,7 +57,7 @@ flowchart LR
 | Song | once | net charge, mean hydropathy, sequence hash | major or minor, key, random seed |
 | Section | 64 residues | majority secondary structure, with hysteresis | arrangement, chord pool, instruments, visual preset |
 | Block | 16 residues | smoothed hydropathy, charge density | chord, melody contour, filters, rhythm density, color |
-| Step | 1 residue | residue identity, with probability = **BIO** knob | melodic interval, accents, ghost notes, flare position |
+| Step | 1 residue | residue identity, with probability = **BIO** knob | melodic interval, accents, ghost notes, sticks and camera target |
 
 Two knobs make the trade-off explicit:
 
@@ -100,9 +102,21 @@ The main shape is the glowing backbone. Six presets: Kaleido Helix, Tunnel Fold,
 Color the protein by secondary structure, by position along the chain (N to C) or by hydropathy.
 Kicks and snares come straight from the score, so pulses hit exactly on the beat.
 
+<table>
+<tr>
+<td align="center"><img src="docs/follow.gif" width="420" alt="Follow mode: camera keeps the played residue in frame, orchestra style"><br><sub><b>FOLLOW</b>, orchestra</sub></td>
+<td align="center"><img src="docs/trip.gif" width="420" alt="Trip mode Tunnel Fold: glowing backbone in a feedback tunnel, deep techno"><br><sub><b>TRIP</b> / Tunnel Fold, deep techno</sub></td>
+</tr>
+</table>
+
 <img src="docs/structure_views.png" width="900" alt="Cartoon orbit, follow residue, fly-through and a trip view of PDB 1BD2">
 
-<img src="docs/screenshot.png" width="900" alt="Hydrophonic interface: load panel, style pads, knobs, CRT monitor, 16-step sequencer and analyzer">
+## The HX-20
+
+Everything sits on one 90s-style rack unit: load a protein (01), choose a sound (02), play (03).
+The 16-step LED sequencer shows the residues of the current block, the analyzer shows how hydropathy, flexibility and structure drive the song.
+
+<img src="docs/screenshot.png" width="900" alt="Hydrophonic interface: load panel, style pads, knobs, CRT monitor in follow mode, 16-step sequencer and analyzer">
 
 ## Quick start
 

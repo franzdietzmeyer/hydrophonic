@@ -487,7 +487,7 @@ class ProteinViz {
     if (g.idx.length) this.stickVao = this._vao(this.prog.stick, g.verts, [['aPos', 3], ['aNrm', 3], ['aCol', 3], ['aGlow', 1]], g.idx);
   }
   setAudio(fft, wave){ this.fft = fft; this.wave = wave; this.avgInit = false; }
-  setPlaying(on){ this.playing = on; if (!on) { this.cur = -1; this.section = null; } }
+  setPlaying(on){ this.playing = on; if (!on) { this.cur = -1; this.camRes = null; this.section = null; } }
   setPreset(key){
     if (key === 'auto' || key === 'trip') { this.autoMode = key === 'auto' ? 'structure' : 'trip';
       const sec = this.section || 'intro'; this._target(VIZ_AUTO[this.autoMode][sec] || VIZ_AUTO[this.autoMode].intro); return; }
@@ -506,7 +506,12 @@ class ProteinViz {
   }
   // called from the transport (Tone.Draw), knows the score
   onStep(st, S){
-    if (st.i >= 0) { if (this.cur < 0 || Math.abs(st.i - this.curF) > 24) this.curF = st.i; this.cur = st.i; }
+    if (st.i >= 0) {
+      // camera progress is monotonic: styles that loop a block move the camera through it once, spread over all passes
+      this.camRes = Math.min(S.n - 1, st.b * BLOCK + (st.rep * BLOCK + st.s) / S.rep);
+      if (this.cur < 0 || Math.abs(this.camRes - this.curF) > 24) this.curF = this.camRes;
+      this.cur = st.i;
+    }
     const ch = S.chords[st.b]; if (ch) this.hueT = ((S.rootPc + ch[0]) % 12) / 12;
     const ph = S.phrases[st.ph], sec = ph.role !== 'main' ? ph.role : ph.type;
     if (this.autoMode && sec !== this.section) this._target(VIZ_AUTO[this.autoMode][sec]);
@@ -626,7 +631,7 @@ class ProteinViz {
   _posAt(arr, f){ const n = arr.length; f = clamp(f, 0, n - 1); const i = Math.floor(f), t = f - i; return V3.lerp(arr[i], arr[Math.min(n - 1, i + 1)], t); }
   _camera(dt, P){
     const c = this.cam, live = this.playing && this.cur >= 0 && this.ca, A = 1 / (this.rad || 30);
-    this.curF += (Math.max(0, this.cur) - this.curF) * (1 - Math.exp(-dt * 10));
+    this.curF += (Math.max(0, this.camRes ?? this.cur) - this.curF) * (1 - Math.exp(-dt * 10));
     let pos, tgt, fov, kp = 2.2, kt = 3.5;
     if (P.cam === 'orbit' || !live) {
       const tilt = 0.35 * Math.sin(this.time * 0.13), d = 2.7 - 0.5 * P.scene;

@@ -134,7 +134,7 @@ select.lcdsel{background:var(--lcdbg);color:var(--lcd);border:2px solid #050505;
 .vlabel::before{content:"";position:absolute;left:0;top:0;width:26px;height:1px;background:rgba(255,207,107,.7);transform:rotate(-38deg);transform-origin:0 0}
 .vlabel span{position:absolute;left:20px;top:-30px;font:clamp(12px,1.3vw,17px)/1 var(--lcdf);letter-spacing:.08em;color:#ffe2a8;background:rgba(10,12,16,.72);border:1px solid rgba(255,176,0,.45);padding:3px 7px;border-radius:2px;white-space:nowrap;text-shadow:0 0 6px rgba(255,176,0,.6)}
 .hud.sig{bottom:12px;left:50%;transform:translateX(-50%);font-size:clamp(10px,1.1vw,14px);color:rgba(236,231,214,.28);text-shadow:none;letter-spacing:.3em;white-space:nowrap}
-.hud.tl{top:14px;left:18px}.hud.tr{top:14px;right:18px;text-align:right}.hud.bl{bottom:14px;left:18px}.hud.br{bottom:14px;right:18px;text-align:right}
+.hud.tl{top:14px;left:18px;max-width:64%}.hud.tr{top:14px;right:18px;text-align:right;max-width:34%;white-space:nowrap}.hud.bl{bottom:14px;left:18px}.hud.br{bottom:14px;right:18px;text-align:right}
 .hud small{display:block;font-size:.62em;color:#9fe8b8;text-shadow:0 0 5px rgba(67,224,138,.7)}
 .hud .led{width:.5em;height:.5em;margin-left:.4em;vertical-align:middle}
 .insert{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;z-index:3;pointer-events:none;
@@ -2279,7 +2279,7 @@ class ProteinViz {
     if (g.idx.length) this.stickVao = this._vao(this.prog.stick, g.verts, [['aPos', 3], ['aNrm', 3], ['aCol', 3], ['aGlow', 1]], g.idx);
   }
   setAudio(fft, wave){ this.fft = fft; this.wave = wave; this.avgInit = false; }
-  setPlaying(on){ this.playing = on; if (!on) { this.cur = -1; this.section = null; } }
+  setPlaying(on){ this.playing = on; if (!on) { this.cur = -1; this.camRes = null; this.section = null; } }
   setPreset(key){
     if (key === 'auto' || key === 'trip') { this.autoMode = key === 'auto' ? 'structure' : 'trip';
       const sec = this.section || 'intro'; this._target(VIZ_AUTO[this.autoMode][sec] || VIZ_AUTO[this.autoMode].intro); return; }
@@ -2298,7 +2298,12 @@ class ProteinViz {
   }
   // called from the transport (Tone.Draw), knows the score
   onStep(st, S){
-    if (st.i >= 0) { if (this.cur < 0 || Math.abs(st.i - this.curF) > 24) this.curF = st.i; this.cur = st.i; }
+    if (st.i >= 0) {
+      // camera progress is monotonic: styles that loop a block move the camera through it once, spread over all passes
+      this.camRes = Math.min(S.n - 1, st.b * BLOCK + (st.rep * BLOCK + st.s) / S.rep);
+      if (this.cur < 0 || Math.abs(this.camRes - this.curF) > 24) this.curF = this.camRes;
+      this.cur = st.i;
+    }
     const ch = S.chords[st.b]; if (ch) this.hueT = ((S.rootPc + ch[0]) % 12) / 12;
     const ph = S.phrases[st.ph], sec = ph.role !== 'main' ? ph.role : ph.type;
     if (this.autoMode && sec !== this.section) this._target(VIZ_AUTO[this.autoMode][sec]);
@@ -2418,7 +2423,7 @@ class ProteinViz {
   _posAt(arr, f){ const n = arr.length; f = clamp(f, 0, n - 1); const i = Math.floor(f), t = f - i; return V3.lerp(arr[i], arr[Math.min(n - 1, i + 1)], t); }
   _camera(dt, P){
     const c = this.cam, live = this.playing && this.cur >= 0 && this.ca, A = 1 / (this.rad || 30);
-    this.curF += (Math.max(0, this.cur) - this.curF) * (1 - Math.exp(-dt * 10));
+    this.curF += (Math.max(0, this.camRes ?? this.cur) - this.curF) * (1 - Math.exp(-dt * 10));
     let pos, tgt, fov, kp = 2.2, kt = 3.5;
     if (P.cam === 'orbit' || !live) {
       const tilt = 0.35 * Math.sin(this.time * 0.13), d = 2.7 - 0.5 * P.scene;
@@ -2771,7 +2776,7 @@ async function playInner(token){
   state.wave = new Tone.Waveform(1024); state.master.lim.connect(state.wave);
   state.fft = new Tone.Analyser('fft', 1024); state.master.lim.connect(state.fft);
   if (viz) { viz.setAudio(state.fft, state.wave); viz.setPlaying(true); }
-  $('hudStyle').textContent = STYLES[state.styleKey].name; $('hudBpm').textContent = `${state.song.bpm} BPM | ${state.song.keyName}`;
+  $('hudStyle').textContent = STYLES[state.styleKey].short || STYLES[state.styleKey].name; $('hudBpm').textContent = `${state.song.bpm} BPM | ${state.song.keyName}`;
   const T = Tone.Transport;
   state.rig = await createRig(state.song, T, state.master.inp, (st, time) => Tone.Draw.schedule(() => onStep(st), time), samples);
   sampleReport(state.rig);
@@ -2892,7 +2897,7 @@ const unlock = () => { if (Tone.context.state !== 'running') Tone.start().catch(
 document.addEventListener('visibilitychange', () => { if (!document.hidden && state.playing) unlock(); });
 window.addEventListener('error', e => setStatus('Error: ' + e.message, true));
 window.addEventListener('unhandledrejection', e => setStatus('Error: ' + (e.reason && e.reason.message || e.reason), true));
-window.__mf = {state, renderOffline, useProtein, loadQuery, setMode, setStyle, STYLES, makeSong, knobs, get viz(){ return viz; }};
+window.__mf = {state, renderOffline, useProtein, loadQuery, setMode, setStyle, STYLES, makeSong, knobs, onStep, get viz(){ return viz; }};
 
 </script>
 </body>

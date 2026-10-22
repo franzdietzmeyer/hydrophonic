@@ -247,7 +247,7 @@ async function playInner(token){
   state.wave = new Tone.Waveform(1024); state.master.lim.connect(state.wave);
   state.fft = new Tone.Analyser('fft', 1024); state.master.lim.connect(state.fft);
   if (viz) { viz.setAudio(state.fft, state.wave); viz.setPlaying(true); }
-  $('hudStyle').textContent = STYLES[state.styleKey].name; $('hudBpm').textContent = `${state.song.bpm} BPM | ${state.song.keyName}`;
+  $('hudStyle').textContent = STYLES[state.styleKey].short || STYLES[state.styleKey].name; $('hudBpm').textContent = `${state.song.bpm} BPM | ${state.song.keyName}`;
   const T = Tone.Transport;
   state.rig = await createRig(state.song, T, state.master.inp, (st, time) => Tone.Draw.schedule(() => onStep(st), time), samples);
   sampleReport(state.rig);
@@ -368,4 +368,4 @@ const unlock = () => { if (Tone.context.state !== 'running') Tone.start().catch(
 document.addEventListener('visibilitychange', () => { if (!document.hidden && state.playing) unlock(); });
 window.addEventListener('error', e => setStatus('Error: ' + e.message, true));
 window.addEventListener('unhandledrejection', e => setStatus('Error: ' + (e.reason && e.reason.message || e.reason), true));
-window.__mf = {state, renderOffline, useProtein, loadQuery, setMode, setStyle, STYLES, makeSong, knobs, get viz(){ return viz; }};
+window.__mf = {state, renderOffline, useProtein, loadQuery, setMode, setStyle, STYLES, makeSong, knobs, onStep, get viz(){ return viz; }};
