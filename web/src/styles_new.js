@@ -1,3 +1,5 @@
+// Hydrophonic, protein-to-music synthesizer. Copyright (C) 2026 Franz Dietzmeyer
+// SPDX-License-Identifier: AGPL-3.0-or-later  (see LICENSE; source: https://github.com/franzdietzmeyer/hydrophonic)
 // ---------- composer styles ----------
 // bit reduction via a static WaveShaper curve (no AudioWorklet needed, works from file://)
 function crusher(R, bits){ const L = Math.pow(2, bits - 1); return track(R, new Tone.WaveShaper(v => Math.round(v * L) / L, 4096)); }

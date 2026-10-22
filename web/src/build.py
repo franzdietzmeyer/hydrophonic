@@ -1,3 +1,4 @@
+# Hydrophonic build script. Copyright (C) 2026 Franz Dietzmeyer. SPDX-License-Identifier: AGPL-3.0-or-later
 import pathlib
 p=pathlib.Path(__file__).parent
 h=(p/'ui.html').read_text()

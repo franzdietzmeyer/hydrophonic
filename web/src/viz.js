@@ -1,3 +1,5 @@
+// Hydrophonic, protein-to-music synthesizer. Copyright (C) 2026 Franz Dietzmeyer
+// SPDX-License-Identifier: AGPL-3.0-or-later  (see LICENSE; source: https://github.com/franzdietzmeyer/hydrophonic)
 // ---------- Visualizer: MilkDrop-style feedback engine, the protein is the central "custom shape" ----------
 // Pipeline per frame (as in MilkDrop): warp previous frame (zoom, rot, warp, dx/dy, kaleido) -> decay ->
 // draw shapes/waves into it (protein trail, wave ring, beat rings) -> composite (echo, bloom, CRT) + crisp protein layer.

@@ -1,80 +1,194 @@
-# Hydrophonic
+<div align="center">
 
-**Turn any protein into music and audio-reactive visuals, right in the browser.**
+```
+    __  ____  ______  ____  ____  ____  __  ______  _   ____________
+   / / / /\ \/ / __ \/ __ \/ __ \/ __ \/ / / / __ \/ | / /  _/ ____/
+  / /_/ /  \  / / / / /_/ / / / / /_/ / /_/ / / / /  |/ // // /
+ / __  /   / / /_/ / _, _/ /_/ / ____/ __  / /_/ / /|  // // /___
+/_/ /_/   /_/_____/_/ |_|\____/_/   /_/ /_/\____/_/ |_/___/\____/
 
-Type a PDB ID, a UniProt accession (AlphaFold model) or paste a FASTA sequence. Hydrophonic reads the
-sequence, secondary structure, hydropathy, charge and flexibility, composes a song in one of 15 styles
-and renders a MilkDrop-style visualizer with the 3D backbone in the middle.
+                    HX-20  PROTEIN  SYNTHESIZER
+```
 
-An artsy, nerdy science-communication project. No install, no server, no build step.
+**Protein in. Music out.**
+
+Type a PDB ID, a UniProt accession or a raw sequence.
+Hydrophonic reads the fold, composes a song in one of 15 styles
+and throws the backbone into a 90s-style audio-reactive visualizer.
+
+![Tone.js](https://img.shields.io/badge/audio-Tone.js-ff7a1a?style=flat-square)
+![WebGL2](https://img.shields.io/badge/visuals-WebGL2-46f08f?style=flat-square)
+![No build step](https://img.shields.io/badge/build-none-ffb000?style=flat-square)
+![License](https://img.shields.io/badge/license-AGPL--3.0-ece7d6?style=flat-square)
+![Data](https://img.shields.io/badge/data-RCSB%20PDB%20%7C%20AlphaFold%20DB-4fa8ff?style=flat-square)
+
+<img src="docs/demo.gif" width="720" alt="Visualizer: the backbone of PDB 1BD2 inside a feedback tunnel, a kaleidoscope and an oscilloscope">
+
+</div>
+
+---
+
+## Why
+
+A protein is a sequence of 20 letters folded into helices, sheets and loops.
+Turning that 1:1 into notes sounds like a cat on a keyboard: neighbouring residues barely correlate.
+
+Hydrophonic does what a musician would do. It listens to the protein on several time scales,
+lets slow properties shape the song and lets single residues add detail.
+The result is music you would actually leave on, and every song is still a fingerprint of its protein.
+
+## How a fold becomes a song
+
+```mermaid
+flowchart LR
+    A[PDB ID / UniProt / FASTA] --> B[Parse mmCIF<br/>sequence, helix/sheet/coil,<br/>CA trace, B-factor]
+    B --> C[Features<br/>Kyte-Doolittle hydropathy,<br/>charge, smoothing]
+    C --> D[Composer<br/>sections, chords,<br/>motifs, phrase forms]
+    D --> E[Style engine<br/>15 styles, Tone.js,<br/>sampled instruments]
+    E --> F((Speakers))
+    E --> G[Visualizer<br/>WebGL2 feedback,<br/>backbone ribbon]
+    B --> G
+```
+
+| Level | Changes every | Read from the protein | Becomes |
+|---|---|---|---|
+| Song | once | net charge, mean hydropathy, sequence hash | major or minor, key, random seed |
+| Section | 64 residues | majority secondary structure, with hysteresis | arrangement, chord pool, instruments, visual preset |
+| Block | 16 residues | smoothed hydropathy, charge density | chord, melody contour, filters, rhythm density, color |
+| Step | 1 residue | residue identity, with probability = **BIO** knob | melodic interval, accents, ghost notes, flare position |
+
+Two knobs make the trade-off explicit:
+
+- **BIO** at 0% lets the composer write freely, steered only by the slow features. At 100% each residue picks the next melodic step.
+- **RAW 1:1** switches to the naive mapping, so you can hear why the composer exists.
+
+## Styles
+
+| Group | Style | What the protein does |
+|---|---|---|
+| Keys & classic | **Piano** | Left-hand pattern changes with helix, sheet and coil; right hand sings the hydropathy contour |
+| | **Baroque** | Helix and coil: a canon one beat later. Sheet: the second voice is the mirror image of the first |
+| | **Orchestra** | The melody instrument follows the fold: helix horn, sheet trumpet, coil flute. Aromatics ring the glockenspiel |
+| | **Music box** | A slow lullaby over the contour, for kids and outreach |
+| Jazz & world | **Jazz trio** | Walking bass; the charge of a residue decides whether the approach note comes from above or below |
+| | **Bossa nova** | Nylon guitar, clave and flute over jazz progressions |
+| | **Gamelan** | Slendro tuning for basic proteins, pelog-like for acidic ones. Even and odd residues interlock as polos and sangsih |
+| Electronic | **Deep Techno** | Sidechain pump, dub chords, a riser before every section that brings more energy |
+| | **Acid** | One residue per 16th of a 303 line: charged = accent, glycine = ghost, proline = slide |
+| | **Drum & Bass** | Reese bass, two-step breaks, ghost snares where charged residues sit |
+| | **Synthwave** | Gated snare, Juno pads, a gliding saw lead in helix and sheet sections |
+| | **Berlin School** | An 8-step sequencer motif built from the residues, mutated by charge |
+| | **Ambient** | Crossfading pads; flexible regions (high B-factor) smear into the echo |
+| Retro & chill | **8-bit RPG** | Four handheld channels, bouncy melody, harmony a third below on the repeat |
+| | **Lo-fi** | Swing, rootless 7th/9th voicings, vinyl crackle |
+
+## The visualizer
+
+An original engine built on the classic MilkDrop recipe: warp the last frame, let it decay,
+draw new shapes into it. The difference: the main shape is your protein.
+
+- The CA trace becomes a glowing ribbon: wide in sheets, thin in coils.
+- The played part lights up, the residue sounding right now flares white.
+- Kicks and snares come straight from the score, so pulses hit exactly on the beat.
+- Bass, mid and treble are measured relative to their own average, like in MilkDrop, so every style reacts equally.
+- Six presets: Kaleido Helix, Tunnel Fold, Plasma Drift, Backbone Scope (the backbone becomes the oscilloscope), Hyperspace, Mirror Crystal.
+- **AUTO** switches preset with the song sections.
+
+<img src="docs/screenshot.png" width="900" alt="Hydrophonic interface: load panel, style pads, knobs, CRT monitor, 16-step sequencer and analyzer">
 
 ## Quick start
 
 ```bash
-git clone https://github.com/<your-name>/hydrophonic.git
+git clone https://github.com/franzdietzmeyer/hydrophonic.git
 cd hydrophonic/web
 python3 -m http.server 8000
 ```
 
-Open <http://localhost:8000>, press **LOAD**, pick a sound, press **PLAY**.
-Any static web server works; opening `web/index.html` directly from disk usually works too.
+Open <http://localhost:8000>, then:
 
-Keyboard: `Space` play/stop, `F` fullscreen, `N` next visual. Double-click a knob to reset it.
+1. **Load**: type `1A2C` (or a UniProt ID like `P69905`, or paste a FASTA) and press LOAD.
+2. **Sound**: pick a style, turn the knobs.
+3. **Play**: press PLAY, then `F` for fullscreen.
+
+No internet? Press **OFFLINE DEMO**: instruments fall back to synthesizers, but Tone.js still needs to have loaded once.
+
+| Key | Action |
+|---|---|
+| `Space` | play / stop |
+| `F` or double-click the screen | fullscreen |
+| `N` | next visual preset |
+| double-click a knob | reset it |
+| `Shift` + drag a knob | fine adjustment |
+
+## Inputs
+
+| Input | Source | Structure |
+|---|---|---|
+| PDB ID, e.g. `4HHB` | RCSB PDB | from the file; longest chain selected, all chains switchable |
+| UniProt accession, e.g. `P69905` | AlphaFold DB | predicted model; pLDDT is used as flexibility |
+| FASTA or plain sequence | pasted | none: a generated path is shown and clearly labeled |
+| `.cif` file | your disk | from the file; secondary structure estimated from CA geometry if the file has none |
 
 ## Deploy
 
-**Netlify:** connect the GitHub repo. `netlify.toml` already sets the publish directory to `web`, no build command.
-Or drag the `web` folder onto <https://app.netlify.com/drop>.
+Static files only, no server code, no build step.
 
-**GitHub Pages / any static host:** serve the contents of `web/`.
-
-## How a protein becomes music
-
-| Level | Changes every | Protein source | Musical target |
-|---|---|---|---|
-| Song | once | net charge, mean hydropathy, sequence hash | major/minor, key, random seed |
-| Section | 64 residues | majority secondary structure (with hysteresis) | arrangement, chord pool, instruments, visual preset |
-| Block | 16 residues | smoothed hydropathy, charge density | chord, melody contour, filters, rhythm density, color |
-| Step | 1 residue | residue identity (probability = BIO knob) | melodic interval, accents, ghost notes |
-
-The composer writes phrase forms (AABA, ABAB, ...), motifs, chord progressions and cadences, so the music
-stays musical while the protein steers it. `RAW 1:1` mode plays the naive mapping for comparison.
-
-**Styles:** Piano, Baroque counterpoint, Orchestra, Music box, Jazz trio, Bossa nova, Gamelan,
-Deep Techno, Acid, Drum & Bass, Synthwave, Berlin School, Ambient, 8-bit RPG, Lo-fi.
-
-**Inputs:** PDB IDs (RCSB), UniProt accessions (AlphaFold DB), FASTA or plain sequences (no structure: a generated
-path is shown and labeled), local `.cif` files, and an offline demo (PDB 1BD2, chain A).
+- **Netlify**: import the repo; `netlify.toml` already publishes `web/`. Or drag `web/` onto <https://app.netlify.com/drop>.
+- **Anything else**: serve the contents of `web/`.
 
 ## Project structure
 
 ```
 web/
-  index.html          built, self-contained app (this is what gets deployed)
+  index.html          the built, self-contained app (this is what gets deployed)
   src/
-    ui.html           page layout and styles (90s hardware look)
-    bio.js            mmCIF / FASTA parsing, secondary structure, features
+    ui.html           layout and styles of the HX-20
+    bio.js            mmCIF and FASTA parsing, secondary structure, features
     engine.js         song structure, composer, sample loading, scheduling
-    styles_*.js       the music styles
+    styles_*.js       the 15 music styles
     viz.js            WebGL2 visualizer
-    app.js            UI wiring
-    demo.js           offline demo data
+    app.js            controls, knobs, sequencer strip, analyzer
+    demo.js           offline demo (PDB 1BD2, chain A)
     build.py          inlines everything into web/index.html
-legacy/streamlit/     the original Python / Streamlit prototype
+legacy/streamlit/     the first Python prototype
+docs/                 README media
 ```
 
-After editing anything in `web/src`, rebuild:
+After changing anything in `web/src`:
 
 ```bash
 python3 web/src/build.py
 ```
 
-## Requirements
+## Browser support
 
-A current desktop browser with WebGL2 and Web Audio (Chrome, Edge, Firefox, Safari 15+).
-Internet access is needed for Tone.js, protein data and instrument samples. Without samples the styles fall back to synthesizers.
+Developed and tested in **Chrome**. Other browsers currently load and render but may not play audio; fixing that is on the roadmap.
+Requires WebGL2 and Web Audio.
+
+## Roadmap
+
+- [ ] Audio in Safari and Firefox
+- [ ] Disulfide bonds as call and response, binding sites as special events
+- [ ] MIDI export
+- [ ] Sampled drum kits
+- [ ] Shareable links (protein + style + variation in the URL)
 
 ## Credits
 
-See [CREDITS.md](CREDITS.md). Code: MIT. Samples and data have their own licenses
-(Salamander Grand Piano CC BY 3.0, FluidR3 GM MIT, PDB data CC0, AlphaFold DB CC BY 4.0).
+Structures from [RCSB PDB](https://www.rcsb.org/) (CC0) and [AlphaFold DB](https://alphafold.ebi.ac.uk/) (CC BY 4.0, Jumper et al., *Nature* 2021).
+Audio by [Tone.js](https://tonejs.github.io/). Samples: Salamander Grand Piano by Alexander Holm (CC BY 3.0) and FluidR3 GM by Frank Wen (MIT).
+Visualizer inspired by MilkDrop (Ryan Geiss); no MilkDrop code is used.
+Full list in [CREDITS.md](CREDITS.md).
+
+## License
+
+Hydrophonic is free software under the **GNU Affero General Public License v3.0 or later** ([LICENSE](LICENSE)).
+
+In short: you may use, study, modify and share it, also commercially. If you distribute it, or run a modified
+version as a website or other network service, you must make your complete source code available under the same license
+and keep the copyright notice. Closed-source forks are not allowed.
+
+The very first public commit was released under MIT; everything after it is AGPL-3.0-or-later.
+Third-party samples and data keep their own licenses (see [CREDITS.md](CREDITS.md)).
+
+<div align="center"><sub>Made by Franz Dietzmeyer. Every protein has a song; most of them just never got the chance.</sub></div>

@@ -1,3 +1,5 @@
+// Hydrophonic, protein-to-music synthesizer. Copyright (C) 2026 Franz Dietzmeyer
+// SPDX-License-Identifier: AGPL-3.0-or-later  (see LICENSE; source: https://github.com/franzdietzmeyer/hydrophonic)
 // ---------- Biology: parsing + per-residue features ----------
 const THREE = {ALA:'A',ARG:'R',ASN:'N',ASP:'D',CYS:'C',GLN:'Q',GLU:'E',GLY:'G',HIS:'H',ILE:'I',
   LEU:'L',LYS:'K',MET:'M',PHE:'F',PRO:'P',SER:'S',THR:'T',TRP:'W',TYR:'Y',VAL:'V',MSE:'M'};
