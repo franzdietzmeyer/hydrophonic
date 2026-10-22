@@ -84,15 +84,23 @@ Two knobs make the trade-off explicit:
 
 ## The visualizer
 
-An original engine built on the classic MilkDrop recipe: warp the last frame, let it decay,
-draw new shapes into it. The difference: the main shape is your protein.
+Two families of views share one WebGL2 renderer.
 
-- The CA trace becomes a glowing ribbon: wide in sheets, thin in coils.
-- The played part lights up, the residue sounding right now flares white.
-- Kicks and snares come straight from the score, so pulses hit exactly on the beat.
-- Bass, mid and treble are measured relative to their own average, like in MilkDrop, so every style reacts equally.
-- Six presets: Kaleido Helix, Tunnel Fold, Plasma Drift, Backbone Scope (the backbone becomes the oscilloscope), Hyperspace, Mirror Crystal.
-- **AUTO** switches preset with the song sections.
+**Structure views** show the real fold, like a molecular viewer that listens:
+
+- A lit **cartoon**: helices as ribbons, strands as arrows, loops as tubes, with multisampled anti-aliasing, rim light and depth fog.
+- The residue being played appears as **sticks** (all heavy atoms, CPK colors), with the previous three fading out, plus a floating label.
+- Already played parts keep their color, the rest of the chain waits desaturated.
+- **Orbit** circles the whole protein, **Follow** keeps the played residue in frame, **Fly** travels along the backbone and always looks at the residue that is sounding.
+- **AUTO** switches between them with the song sections. Audio drives the rim light, a soft aura, the glow on the current residue and thin spectrum bars.
+
+**Trip views** are an original engine built on the classic MilkDrop recipe: warp the last frame, let it decay, draw new shapes into it.
+The main shape is the glowing backbone. Six presets: Kaleido Helix, Tunnel Fold, Plasma Drift, Backbone Scope (the backbone becomes the oscilloscope), Hyperspace, Mirror Crystal.
+
+Color the protein by secondary structure, by position along the chain (N to C) or by hydropathy.
+Kicks and snares come straight from the score, so pulses hit exactly on the beat.
+
+<img src="docs/structure_views.png" width="900" alt="Cartoon orbit, follow residue, fly-through and a trip view of PDB 1BD2">
 
 <img src="docs/screenshot.png" width="900" alt="Hydrophonic interface: load panel, style pads, knobs, CRT monitor, 16-step sequencer and analyzer">
 
@@ -116,7 +124,7 @@ No internet? Press **OFFLINE DEMO**: instruments fall back to synthesizers, but 
 |---|---|
 | `Space` | play / stop |
 | `F` or double-click the screen | fullscreen |
-| `N` | next visual preset |
+| `N` | next visual preset (structure and trip) |
 | double-click a knob | reset it |
 | `Shift` + drag a knob | fine adjustment |
 

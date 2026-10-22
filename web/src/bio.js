@@ -69,17 +69,23 @@ function parseCif(text, label){
   const atoms = cifCategory(lines, 'atom_site');
   if (!atoms.length) throw new Error('No _atom_site records found in file.');
   const model0 = atoms[0].pdbx_PDB_model_num;
-  const chains = new Map();
+  const chains = new Map(), heavy = new Map();   // heavy: residue key -> all non-hydrogen atoms (for stick rendering)
   for (const a of atoms) {
-    if (a.label_atom_id !== 'CA') continue;
     if (a.group_PDB !== 'ATOM' && !(a.group_PDB === 'HETATM' && a.label_comp_id === 'MSE')) continue;
     if (model0 && a.pdbx_PDB_model_num !== model0) continue;
     const alt = a.label_alt_id; if (alt && alt !== '.' && alt !== '?' && alt !== 'A') continue;
     const aa = THREE[a.label_comp_id]; if (!aa) continue;
     const id = a.auth_asym_id || a.label_asym_id;
+    const key = a.label_seq_id + '|' + (a.pdbx_PDB_ins_code || '') + '|' + a.auth_seq_id;
+    const el = (a.type_symbol || a.label_atom_id[0]).toUpperCase();
+    if (el !== 'H' && el !== 'D') {
+      const hk = id + '#' + key;
+      if (!heavy.has(hk)) heavy.set(hk, []);
+      heavy.get(hk).push([a.label_atom_id, el === 'SE' ? 'S' : el, +a.Cartn_x, +a.Cartn_y, +a.Cartn_z]);
+    }
+    if (a.label_atom_id !== 'CA') continue;
     if (!chains.has(id)) chains.set(id, {id, labelAsym: a.label_asym_id, res: []});
     const c = chains.get(id);
-    const key = a.label_seq_id + '|' + (a.pdbx_PDB_ins_code || '') + '|' + a.auth_seq_id;
     if (c.res.length && c.res[c.res.length-1].key === key) continue;
     c.res.push({key, seqId: +a.label_seq_id, aa, b: +a.B_iso_or_equiv,
       x: +a.Cartn_x, y: +a.Cartn_y, z: +a.Cartn_z});
@@ -99,7 +105,8 @@ function parseCif(text, label){
     if (ssMap.size) { ss = c.res.map(r => ssMap.get(r.seqId) || 'C'); ssSource = 'file annotation'; }
     else { ss = caSecondaryStructure(c.res); ssSource = 'estimated from CA geometry'; }
     out.push({id: c.id, seq: c.res.map(r => r.aa), ss, ssSource,
-      b: c.res.map(r => r.b), ca: c.res.map(r => [r.x, r.y, r.z])});
+      b: c.res.map(r => r.b), ca: c.res.map(r => [r.x, r.y, r.z]),
+      atoms: c.res.map(r => heavy.get(c.id + '#' + r.key) || [])});
   }
   out.sort((a, b) => b.seq.length - a.seq.length);
   return {label, title, chains: out};

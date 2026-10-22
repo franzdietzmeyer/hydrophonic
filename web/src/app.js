@@ -194,6 +194,7 @@ function onStep(st){
   renderSteps(st.b, st.s);
   const ph = S.phrases[st.ph], chord = S.raw ? 'RAW' : chordName(S.rootPc, S.chordKeys[st.b]).split(' ')[0];
   if (st.i >= 0) { $('hudRes').textContent = `${THREE_OF[S.chain.seq[st.i]]} ${st.i + 1}`;
+    $('vizLabel').firstChild.textContent = `${THREE_OF[S.chain.seq[st.i]]} ${st.i + 1}`;
     $('hudSS').textContent = `${SS_NAME[S.chain.ss[st.i]]} | kd ${KD[S.chain.seq[st.i]].toFixed(1)}`; }
   $('hudChord').textContent = chord;
   const sec = ph.role !== 'main' ? ph.role : SS_NAME[ph.type];
@@ -340,13 +341,17 @@ $('wav').onclick = async () => {
 window.addEventListener('resize', () => { if (state.chain) drawPlot(); });
 
 // ---------- visualizer ----------
-try { viz = new ProteinViz($('viz')); if (viz.failed) { $('vizErr').textContent = 'WebGL2 not available'; viz = null; } }
+try { viz = new ProteinViz($('viz'), $('vizLabel')); if (viz.failed) { $('vizErr').textContent = 'WebGL2 not available'; viz = null; } }
 catch (e) { $('vizErr').textContent = 'Visualizer error: ' + e.message; console.error(e); viz = null; }
-$('vizPads').innerHTML = [['auto', 'Auto'], ...Object.entries(VIZ_PRESETS).map(([k, p]) => [k, p.name.split(' ')[0]])]
-  .map(([k, nm]) => `<button class="pad${k === 'auto' ? ' on' : ''}" data-viz="${k}" title="${k === 'auto' ? 'follows the song sections' : VIZ_PRESETS[k].name}"><span class="led"></span>${nm}</button>`).join('');
-const markViz = () => document.querySelectorAll('[data-viz]').forEach(b => b.classList.toggle('on', viz && (viz.auto ? b.dataset.viz === 'auto' : b.dataset.viz === viz.presetKey)));
+const VIZ_PADS = [['auto', 'Auto', 'structure views, switching with the song sections'], ['orbit', 'Orbit', 'lit cartoon, camera orbits the whole protein'],
+  ['follow', 'Follow', 'camera follows the residue being played'], ['fly', 'Fly', 'fly along the backbone, looking at the played residue'],
+  ['trip', 'Trip', 'psychedelic feedback visuals (N cycles through all presets)']];
+$('vizPads').innerHTML = VIZ_PADS.map(([k, nm, t]) => `<button class="pad${k === 'auto' ? ' on' : ''}" data-viz="${k}" title="${t}"><span class="led"></span>${nm}</button>`).join('');
+const markViz = () => document.querySelectorAll('[data-viz]').forEach(b => b.classList.toggle('on', !!viz &&
+  (viz.autoMode === 'structure' ? b.dataset.viz === 'auto' : viz.autoMode === 'trip' ? b.dataset.viz === 'trip' : b.dataset.viz === viz.presetKey)));
 document.querySelectorAll('[data-viz]').forEach(b => b.onclick = () => { if (viz) { viz.setPreset(b.dataset.viz); markViz(); } });
 if (viz) viz.onPreset = k => { $('hudPreset').textContent = VIZ_PRESETS[k].name; markViz(); };
+if (viz) $('hudPreset').textContent = VIZ_PRESETS[viz.presetKey].name;
 $('vizColor').onchange = e => { if (viz) viz.colorOverride = +e.target.value; };
 const fullscreen = () => { const s = $('stage'); document.fullscreenElement ? document.exitFullscreen() : s.requestFullscreen && s.requestFullscreen(); };
 $('vizFull').onclick = fullscreen;
