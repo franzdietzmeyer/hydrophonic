@@ -6,7 +6,7 @@ authors:
   - family-names: "Dietzmeyer"
     given-names: "Franz"
 repository-code: "https://github.com/franzdietzmeyer/hydrophonic"
-license: PolyForm-Noncommercial-1.0.0
+license: AGPL-3.0-or-later
 version: "0.5.0"
 date-released: "2026-10-23"
 abstract: >-

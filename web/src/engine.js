@@ -1,5 +1,5 @@
 // Hydrophonic, protein-to-music synthesizer. Copyright (C) 2026 Franz Dietzmeyer
-// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0  (see LICENSE; https://github.com/franzdietzmeyer/hydrophonic)
+// SPDX-License-Identifier: AGPL-3.0-or-later  (see LICENSE; source: https://github.com/franzdietzmeyer/hydrophonic)
 // ---------- Music engine core ----------
 const NOTE_NAMES = ['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
 const MODES = {minor:[0,2,3,5,7,8,10], major:[0,2,4,5,7,9,11], pentMajor:[0,2,4,7,9], pentMinor:[0,3,5,7,10]};

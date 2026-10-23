@@ -1,5 +1,5 @@
 // Hydrophonic, protein-to-music synthesizer. Copyright (C) 2026 Franz Dietzmeyer
-// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0  (see LICENSE; https://github.com/franzdietzmeyer/hydrophonic)
+// SPDX-License-Identifier: AGPL-3.0-or-later  (see LICENSE; source: https://github.com/franzdietzmeyer/hydrophonic)
 // ---------- Visualizer ----------
 // Two families share one renderer:
 //  STRUCTURE views: a lit cartoon (helix ribbons, strand arrows, coil tubes) with the residue being played shown as sticks,
