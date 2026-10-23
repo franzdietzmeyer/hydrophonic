@@ -175,13 +175,6 @@ After changing anything in `web/src`:
 python3 web/src/build.py
 ```
 
-## Roadmap
-
-- [ ] Disulfide bonds as call and response, binding sites as special events
-- [ ] MIDI export
-- [ ] Sampled drum kits
-- [ ] Shareable links (protein + style + variation in the URL)
-
 ## Credits
 
 Structures from [RCSB PDB](https://www.rcsb.org/) (CC0) and [AlphaFold DB](https://alphafold.ebi.ac.uk/) (CC BY 4.0, Jumper et al., *Nature* 2021).
