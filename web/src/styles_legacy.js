@@ -1,5 +1,5 @@
 // Hydrophonic, protein-to-music synthesizer. Copyright (C) 2026 Franz Dietzmeyer
-// SPDX-License-Identifier: AGPL-3.0-or-later  (see LICENSE; source: https://github.com/franzdietzmeyer/hydrophonic)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0  (see LICENSE; https://github.com/franzdietzmeyer/hydrophonic)
 const ACID_CLASS = {A:'root',V:'root',L:'root',I:'root',M:'root',G:'ghost',F:'oct',W:'oct',Y:'oct',
   K:'fifth',R:'fifth',H:'fifth',D:'third',E:'third',C:'sev',P:'slide',S:'rest',T:'rest',N:'rest',Q:'rest'};
 const TONE_IDX = {A:0,V:2,L:0,I:2,M:1,F:4,W:5,Y:4,K:3,R:3,H:1,D:1,E:1,C:3,G:0,P:2,S:2,T:1,N:1,Q:3};

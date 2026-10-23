@@ -1,5 +1,5 @@
 // Hydrophonic, protein-to-music synthesizer. Copyright (C) 2026 Franz Dietzmeyer
-// SPDX-License-Identifier: AGPL-3.0-or-later  (see LICENSE; source: https://github.com/franzdietzmeyer/hydrophonic)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0  (see LICENSE; https://github.com/franzdietzmeyer/hydrophonic)
 // ---------- App / UI ----------
 const $ = id => document.getElementById(id);
 const UNIPROT_RE = /^([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})$/;

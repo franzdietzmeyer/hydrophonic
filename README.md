@@ -19,7 +19,7 @@ and flies you through the structure while it plays, always looking at the amino 
 ![Tone.js](https://img.shields.io/badge/audio-Tone.js-ff7a1a?style=flat-square)
 ![WebGL2](https://img.shields.io/badge/visuals-WebGL2-46f08f?style=flat-square)
 ![No build step](https://img.shields.io/badge/build-none-ffb000?style=flat-square)
-![License](https://img.shields.io/badge/license-AGPL--3.0-ece7d6?style=flat-square)
+![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-ece7d6?style=flat-square)
 ![Data](https://img.shields.io/badge/data-RCSB%20PDB%20%7C%20AlphaFold%20DB-4fa8ff?style=flat-square)
 
 <img src="docs/fly.gif" width="760" alt="Fly-through mode: the camera travels along the backbone of PDB 1BD2 as a jazz trio plays it, the sounding residue shown as sticks with a label">
@@ -189,15 +189,23 @@ Audio by [Tone.js](https://tonejs.github.io/). Samples: Salamander Grand Piano b
 Visualizer inspired by MilkDrop (Ryan Geiss); no MilkDrop code is used.
 Full list in [CREDITS.md](CREDITS.md).
 
+## Citing
+
+If you use Hydrophonic in a talk, a course, an exhibition, a publication or a derived work, please cite it.
+GitHub shows a **"Cite this repository"** button (from [CITATION.cff](CITATION.cff)), or use:
+
+> Dietzmeyer, F. (2026). *Hydrophonic: protein-to-music synthesizer with an audio-reactive structure visualizer* (Version 0.5.0) [Computer software]. https://github.com/franzdietzmeyer/hydrophonic
+
 ## License
 
-Hydrophonic is free software under the **GNU Affero General Public License v3.0 or later** ([LICENSE](LICENSE)).
+Copyright (C) 2026 Franz Dietzmeyer. Licensed under the **[PolyForm Noncommercial License 1.0.0](LICENSE)**.
 
-In short: you may use, study, modify and share it, also commercially. If you distribute it, or run a modified
-version as a website or other network service, you must make your complete source code available under the same license
-and keep the copyright notice. Closed-source forks are not allowed.
+- **Free for non-commercial use:** personal projects, study, research, teaching, schools, universities, public research organizations and charities.
+  You may use, modify and share it for these purposes.
+- **Keep the notices:** anyone who passes on a copy, modified or not, must include the license and the `Required Notice` lines naming the author.
+- **Commercial use needs a separate license.** Get in touch via GitHub.
 
-The very first public commit was released under MIT; everything after it is AGPL-3.0-or-later.
+Versions published before October 23, 2026 were released under MIT (first commit) and AGPL-3.0; those copies keep the license they were published with.
 Third-party samples and data keep their own licenses (see [CREDITS.md](CREDITS.md)).
 
 <div align="center"><sub>Made by Franz Dietzmeyer. Every protein has a song; most of them just never got the chance.</sub></div>

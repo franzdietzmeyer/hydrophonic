@@ -1,5 +1,5 @@
 // Hydrophonic, protein-to-music synthesizer. Copyright (C) 2026 Franz Dietzmeyer
-// SPDX-License-Identifier: AGPL-3.0-or-later  (see LICENSE; source: https://github.com/franzdietzmeyer/hydrophonic)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0  (see LICENSE; https://github.com/franzdietzmeyer/hydrophonic)
 // ---------- more composer styles: jazz, baroque, gamelan, drum & bass, bossa nova, music box ----------
 const RH_BAROQUE = {   // 16th grid, 1 bar
   sparse: [[[0,2],[2,2],[4,4],[8,2],[10,2],[12,4]], [[0,4],[4,2],[6,2],[8,4],[12,4]]],

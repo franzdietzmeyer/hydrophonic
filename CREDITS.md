@@ -1,6 +1,6 @@
 # Credits and third-party licenses
 
-The Hydrophonic code in this repository is licensed under AGPL-3.0-or-later (see `LICENSE`), Copyright (C) 2026 Franz Dietzmeyer.
+The Hydrophonic code in this repository is Copyright (C) 2026 Franz Dietzmeyer and licensed under the PolyForm Noncommercial License 1.0.0 (see `LICENSE`).
 The app loads the following third-party resources at runtime. None of them are bundled in this repository.
 
 | Resource | Author / source | License | Used for |

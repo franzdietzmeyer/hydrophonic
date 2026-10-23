@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use Hydrophonic in a talk, course, exhibition, publication or derived work, please cite it as below."
+title: "Hydrophonic: protein-to-music synthesizer with an audio-reactive structure visualizer"
+type: software
+authors:
+  - family-names: "Dietzmeyer"
+    given-names: "Franz"
+repository-code: "https://github.com/franzdietzmeyer/hydrophonic"
+license: PolyForm-Noncommercial-1.0.0
+version: "0.5.0"
+date-released: "2026-10-23"
+abstract: >-
+  Hydrophonic turns a protein (PDB ID, UniProt accession via AlphaFold DB, or FASTA sequence)
+  into music in one of 15 styles. A composer maps secondary structure, hydropathy, charge and
+  flexibility onto song form, harmony and melody, while a WebGL2 visualizer renders the fold as
+  a lit cartoon and flies along the backbone to the residue being played.
+keywords:
+  - protein sonification
+  - data sonification
+  - structural biology
+  - science communication
+  - music generation
+  - WebGL
+  - Web Audio
